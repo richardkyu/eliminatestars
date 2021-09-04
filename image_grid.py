@@ -34,14 +34,7 @@ def check_images_from_folder(folder):
     filenames = [img for img in glob.glob(folder+"/*.png")]
     filenames.sort()
 
-    print()
-    print(folder)
-    print()
-    print(filenames)
-    print()
-
     for filename in filenames:
-        #print("Path name: ",os.path.join(folder,filename))
         img = Image.open(filename)
         dominant_color = find_dominant_color(filename)
         if img is not None:
@@ -132,19 +125,16 @@ def main_process():
     os.remove(IMG_FOLDER_PATH + FILE)
     images_list = check_images_from_folder(IMG_FOLDER_PATH)
 
-    print(images_list)
-
     unique_colors = check_color_similarity(images_list)
 
     grid = create_color_grid(images_list, unique_colors)
 
-    #print(grid, len(grid))
+    print("Image Read") 
+
     output = nested_grid(grid)
     print(output)
     shutil.rmtree(IMG_FOLDER_PATH)
     os.makedirs(IMG_FOLDER_PATH)
-
-    
 
     return output
 
