@@ -27,15 +27,23 @@ def find_dominant_color(image_path):
     colour = ''.join([hex(int(c))[2:].zfill(2) for c in peak])
     #print('most frequent is %s (#%s)' % (peak, colour[:6]))
     return colour[:6]
+
+
 def check_images_from_folder(folder):
     image_colors = []
     filenames = [img for img in glob.glob(folder+"/*.png")]
     filenames.sort()
 
+    print()
+    print(folder)
+    print()
+    print(filenames)
+    print()
+
     for filename in filenames:
         #print("Path name: ",os.path.join(folder,filename))
-        img = Image.open(os.path.join(folder,filename))
-        dominant_color = find_dominant_color(os.path.join(folder,filename))
+        img = Image.open(filename)
+        dominant_color = find_dominant_color(filename)
         if img is not None:
             image_colors.append(dominant_color)
     return image_colors
@@ -115,12 +123,16 @@ def nested_grid(grid):
 
 def main_process():
     print("Processing start image.")
-    image_slicer.slice('/Users/richardkyu/Desktop/Projects Folder/eliminatestars/images/test.png', 81)
 
-    os.remove('/Users/richardkyu/Desktop/Projects Folder/eliminatestars/images/test.png')
-    images_list = check_images_from_folder("/Users/richardkyu/Desktop/Projects Folder/eliminatestars/images")
+    IMG_FOLDER_PATH = './imgs'
+    FILE = '/sample1.png'
 
-    #print(images_list)
+    image_slicer.slice(IMG_FOLDER_PATH + FILE, 81)
+
+    os.remove(IMG_FOLDER_PATH + FILE)
+    images_list = check_images_from_folder(IMG_FOLDER_PATH)
+
+    print(images_list)
 
     unique_colors = check_color_similarity(images_list)
 
@@ -129,8 +141,10 @@ def main_process():
     #print(grid, len(grid))
     output = nested_grid(grid)
     print(output)
-    shutil.rmtree('/Users/richardkyu/Desktop/Projects Folder/eliminatestars/images/')
-    os.makedirs("/Users/richardkyu/Desktop/Projects Folder/eliminatestars/images/")
+    shutil.rmtree(IMG_FOLDER_PATH)
+    os.makedirs(IMG_FOLDER_PATH)
+
+    
 
     return output
 
