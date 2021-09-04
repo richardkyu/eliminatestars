@@ -114,29 +114,35 @@ def nested_grid(grid):
 
     return nested_grid
 
-def main_process():
-    print("Processing start image.")
 
-    IMG_FOLDER_PATH = './imgs'
-    FILE = '/sample1.png'
-
-    image_slicer.slice(IMG_FOLDER_PATH + FILE, 81)
-
-    os.remove(IMG_FOLDER_PATH + FILE)
-    images_list = check_images_from_folder(IMG_FOLDER_PATH)
-
+def slice_and_read_image(folder, file):
+    image_slicer.slice(folder + file, 81)
+    os.remove(folder + file)
+    images_list = check_images_from_folder(folder)
     unique_colors = check_color_similarity(images_list)
 
     grid = create_color_grid(images_list, unique_colors)
-
-    print("Image Read") 
-
     output = nested_grid(grid)
-    print(output)
-    shutil.rmtree(IMG_FOLDER_PATH)
-    os.makedirs(IMG_FOLDER_PATH)
+
+    shutil.rmtree(folder)
+    os.makedirs(folder)
 
     return output
 
 
+
+def main_process():
+    print("Processing game image.")
+
+    selected_image = 'sample1.png'
+
+    # values based on directory structure
+    img_file = '/' + selected_image
+    os.mkdir('./tmp')
+    shutil.copy('./imgs' + img_file, './tmp' + img_file)
+
+    output = slice_and_read_image('./tmp', img_file)
+    os.removedirs('./tmp')
+
+    return output
 
