@@ -10,15 +10,14 @@ dead_end_counter_limit = 250
 def main():
 	"""Show how to search for similar neighbors in a 2D array structure."""
 	gameboard = image_grid.main_process()
-	neighbors = (-1, 0), (0, +1), (+1, 0), (0, -1)
+	neighbors = ((-1, 0), (0, +1), (+1, 0), (0, -1))
 	similar = eq
 
 	print("Start state:")
-	for element in gameboard:
-		print(element)
+	print_gameboard(gameboard)
 	#to_modify = list(find_similar(some_array, neighbors, start, similar, 'BFS'))
 	#gameboard = modify_gameboard(some_array, to_modify)
-	enable_manual = "N" #input("Enable manual mode? (Y / N) ")
+	enable_manual = "Y" #input("Enable manual mode? (Y / N) ")
 
 	if enable_manual == "N" or enable_manual == "No":
 		gameboard_original = copy.deepcopy(gameboard)
@@ -172,8 +171,7 @@ def main():
 
 			gameboard = modify_gameboard(gameboard, modify_coords)
 			print("Zeroes: ", len(get_zeroes(gameboard,neighbors,similar)))
-			for element in gameboard:
-				print(element)
+			print_gameboard(gameboard)
 
 
 
@@ -250,6 +248,21 @@ def find_similar(array, neighbors, start, similar, mode):
 						visit.append(index)
 		yield node
 
+def print_gameboard(gameboard):
+	symbols = [' ', '$','^','@','+','=','*','V',';','&']
+
+	# gameboard assumed to be 9x9
+	for row in range(9):
+		print(row, end='')
+		print(' | ', end='')
+
+		for num in gameboard[row]:
+			print(symbols[num] + ' ', end='')
+		print()
+	print('  --------------------')
+	print('    0 1 2 3 4 5 6 7 8 ')
+
+	
 
 def get_item(array, index):
 	"""Access the data structure based on the given position information."""
