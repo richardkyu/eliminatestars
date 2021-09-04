@@ -131,18 +131,97 @@ def slice_and_read_image(folder, file):
 
 
 
+#
+# Caching System
+def check_for_image_in_cache(image_name):
+    '''
+    returns None if this image is not cached, or if the cached data
+    is invalid. It does NOT check that the cached file matches 
+    the image (incorrect data).
+
+    If returning None, the cache file will be deleted.
+
+    image_name is expected to be in the form 'asdsad.png'
+    '''
+    cache_file_name = image_name.split('.')[0] + '.txt'
+    cache_file_path = './cache/' + cache_file_name
+
+    if not os.path.exists(cache_file_path):
+        print("Image isn't cached")
+        return None
+
+    try:
+        with open(cache_file_path, 'r') as cached_content:
+            # first row = "5 6" meaning "rows cols"
+            dim_info = cached_content.readline()
+            rows, cols = [int(x) for x in dim_info.split(" ")]
+
+            img_grid = []
+            for row in range(rows):
+                img_grid += [[int(x) for x in cached_content.readline().split(" ")]]
+        
+        return img_grid
+
+    except Exception:
+        print("Cache file is invalid")
+        os.remove(cache_file_path)
+        return None
+
+    
+
+def write_image_grid_to_cache(image_name, grid):
+    rows = len(grid)
+    cols = len(grid[0])
+
+    print("Rows and cols")
+    print(rows)
+    print(cols)
+    print()
+
+    cache_file_name = image_name.split('.')[0] + '.txt'
+    cache_file_path = './cache/' + cache_file_name
+
+    with open(cache_file_path, 'w') as cache_file:
+        # first row = "5 6" meaning "rows cols"
+        cache_file.write(str(rows) + " " + str(cols) + "\n")
+
+        for row in range(rows):
+            row_str = ""
+            for value in grid[row]:
+                row_str += str(value) + " "
+            row_str = row_str[:-1] + "\n"
+
+            cache_file.write(row_str)
+    
+
+
+
+
+
+
+
+
+
 def main_process():
     print("Processing game image.")
 
     selected_image = 'sample1.png'
 
-    # values based on directory structure
-    img_file = '/' + selected_image
-    os.mkdir('./tmp')
-    shutil.copy('./imgs' + img_file, './tmp' + img_file)
+    output = check_for_image_in_cache(selected_image)
 
-    output = slice_and_read_image('./tmp', img_file)
-    os.removedirs('./tmp')
+    if output == None:
+        print("Processing the image")
+
+        # values based on directory structure
+        img_file = '/' + selected_image
+        os.mkdir('./tmp')
+        shutil.copy('./imgs' + img_file, './tmp' + img_file)
+
+        output = slice_and_read_image('./tmp', img_file)
+        os.removedirs('./tmp')
+
+        # write to cache for next time
+        write_image_grid_to_cache(selected_image, output)
 
     return output
 
