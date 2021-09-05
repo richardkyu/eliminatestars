@@ -205,7 +205,7 @@ def write_image_grid_to_cache(image_name, grid):
 def main_process():
     print("Processing game image.")
 
-    selected_image = 'sample1.png'
+    selected_image = 'sample6.png'
 
     output = check_for_image_in_cache(selected_image)
 
