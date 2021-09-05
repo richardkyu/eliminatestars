@@ -10,97 +10,103 @@ dead_end_counter_limit = 500
 def main():
 	"""Show how to search for similar neighbors in a 2D array structure."""
 	gameboard = image_grid.main_process()
-	neighbors = ((-1, 0), (0, +1), (+1, 0), (0, -1))
-	similar = eq
+	neighbour_offsets = ((-1, 0), (0, +1), (+1, 0), (0, -1))
 
 	print("Start state:")
 	print_gameboard(gameboard)
-	#to_modify = list(find_similar(some_array, neighbors, start, similar, 'BFS'))
+	#to_modify = find_similar(some_array, neighbors, start, BFS=True)
 	#gameboard = modify_gameboard(some_array, to_modify)
-	enable_manual = "N" #input("Enable manual mode? (Y / N) ")
+	enable_manual = "Y" #input("Enable manual mode? (Y / N) ")
 
 	if enable_manual == "N" or enable_manual == "No":
-		gameboard_original = copy.deepcopy(gameboard)
-		counter = 0
-		instance_counter = 0
-		sum = 0
-		best_result = 82
-		best_so_far = 0
-		dead_end_counter = 0
-
-		average = 40
-		gameboard = copy.deepcopy(gameboard_original)
-		coordinates_used = []
-		while(gameboard[8][0] != 0):
-			counter+=1
-			#print("Before mod:", coordinates_used)
-			#for element in gameboard:
-				#print(element)
-			final_info = random_search(gameboard, neighbors, similar, "random")	
-			#print(final_info)
-
-			for element in final_info[0]:
-				coordinates_used.append(element)
-			
-			#print("coord used + final info", coordinates_used
-
-			best_so_far = final_info[1]
-			if 81-best_so_far != 0:
-				if (81-best_so_far)< best_result:
-					best_result = 81-best_so_far
-					dead_end_counter=0
-					state_score = calculate_state_score(gameboard, neighbors, similar)
-					#print_gameboard(gameboard)
-
-					print("Best: ", best_result,"\n", "Coordinates: ",coordinates_used,"\n", "State score: ", state_score)
-				dead_end_counter +=1
-					
-
-			#print("Coordinates: ",coordinates_used,"\n")
-			#for element in gameboard:
-				#print(element)
-
-			if gameboard[8][0] != 0 and dead_end_counter<=dead_end_counter_limit:
-
-				if len(coordinates_used)<20:
-					go_back_by = len(coordinates_used) - min(random.randint(7,15), len(coordinates_used))
-				else:
-					go_back_by = len(coordinates_used) - min(random.randint(2,5), len(coordinates_used))
-				coordinates_used = coordinates_used[:go_back_by]
-				#print("After mod: ",coordinates_used)
-				gameboard = copy.deepcopy(gameboard_original)
-				for element in coordinates_used:
-					start = element[0], element[1]
-					modify_coords = list(find_similar(gameboard, neighbors, start, similar, 'BFS'))
-					gameboard = modify_gameboard(gameboard, modify_coords)
-				
-			if dead_end_counter >dead_end_counter_limit:
-				#print(coordinates_used, 81-best_so_far)
-				dead_end_counter = 0
-				best_result = 82
-				coordinates_used = []
-			
-		print(coordinates_used, len(coordinates_used))
-		print("Searched: ", counter, "possibilities.")
-		
+		automatic_search(gameboard, neighbour_offsets)
 	else:
-		#Manual entering.
-		while(True):
-			testing_gameboard = copy.deepcopy(gameboard)
-			info = find_most_similar(testing_gameboard, neighbors, similar, 'BFS')
-			print ("Suggested: ", info[0], " with ", info[1], " nodes.")
+		manual_search(gameboard, neighbour_offsets)
+
+
+def automatic_search(gameboard, neighbour_offsets):
+	gameboard_original = copy.deepcopy(gameboard)
+	counter = 0
+	instance_counter = 0
+	sum = 0
+	best_result = 82
+	best_so_far = 0
+	dead_end_counter = 0
+
+	average = 40
+	gameboard = copy.deepcopy(gameboard_original)
+	coordinates_used = []
+	while(gameboard[8][0] != 0):
+		counter+=1
+		#print("Before mod:", coordinates_used)
+		#for element in gameboard:
+			#print(element)
+		final_info = random_search(gameboard, neighbour_offsets, "random")	
+		#print(final_info)
+
+		for element in final_info[0]:
+			coordinates_used.append(element)
+		
+		#print("coord used + final info", coordinates_used
+
+		best_so_far = final_info[1]
+		if 81-best_so_far != 0:
+			if (81-best_so_far)< best_result:
+				best_result = 81-best_so_far
+				dead_end_counter=0
+				state_score = calculate_state_score(gameboard, neighbour_offsets)
+				#print_gameboard(gameboard)
+
+				print("Best: ", best_result,"\n", "Coordinates: ",coordinates_used,"\n", "State score: ", state_score)
+			dead_end_counter +=1
+				
+
+		#print("Coordinates: ",coordinates_used,"\n")
+		#for element in gameboard:
+			#print(element)
+
+		if gameboard[8][0] != 0 and dead_end_counter<=dead_end_counter_limit:
+
+			if len(coordinates_used)<20:
+				go_back_by = len(coordinates_used) - min(random.randint(7,15), len(coordinates_used))
+			else:
+				go_back_by = len(coordinates_used) - min(random.randint(2,5), len(coordinates_used))
+			coordinates_used = coordinates_used[:go_back_by]
+			#print("After mod: ",coordinates_used)
+			gameboard = copy.deepcopy(gameboard_original)
+			for element in coordinates_used:
+				start = element[0], element[1]
+				modify_coords = find_similar(gameboard, neighbour_offsets, start, BFS=True)
+				gameboard = modify_gameboard(gameboard, modify_coords)
 			
+		if dead_end_counter >dead_end_counter_limit:
+			#print(coordinates_used, 81-best_so_far)
+			dead_end_counter = 0
+			best_result = 82
+			coordinates_used = []
+		
+	print(coordinates_used, len(coordinates_used))
+	print("Searched: ", counter, "possibilities.")
 
-			x_coord = int(input("Enter x "))
-			y_coord = int(input("Enter y "))
-			start = x_coord, y_coord
-			modify_coords = list(find_similar(gameboard, neighbors, start, similar, 'BFS'))
-			print(modify_coords)
 
-			gameboard = modify_gameboard(gameboard, modify_coords)
-			print("Zeroes: ", len(get_zeroes(gameboard,neighbors,similar)))
-			print_gameboard(gameboard)
+def manual_search(gameboard, neighbour_offsets):
+	while(True):
+		testing_gameboard = copy.deepcopy(gameboard)
+		info, largest = find_most_similar(testing_gameboard, neighbour_offsets, do_bfs=True)
 
+			info = find_most_similar(testing_gameboard, neighbors, similar, 'BFS')
+		print ("Suggested: ", info[0], " with ", info[1], " nodes.")
+		
+
+		x_coord = int(input("Enter x "))
+		y_coord = int(input("Enter y "))
+		start = x_coord, y_coord
+		modify_coords = find_similar(gameboard, neighbour_offsets, start, BFS=True)
+		print(modify_coords)
+
+		gameboard = modify_gameboard(gameboard, modify_coords)
+		print("Zeroes: ", len(get_zeroes(gameboard,neighbour_offsets)))
+		print_gameboard(gameboard)
 
 
 
@@ -159,12 +165,20 @@ def modify_gameboard(array, to_modify):
 
 	return updated_array
 
-def find_similar(array, neighbors, start, similar, mode='BFS'):
-	"""Run either a BFS or BFS algorithm based on criteria from arguments."""
+def find_similar(array, neighbors, start, BFS=True):
+	"""Run either a BFS or DFS algorithm to get the next node"""
 	match = get_item(array, start)
 	block = {start}
 	visit = deque(block)
-	child = dict(BFS=deque.popleft, DFS=deque.pop)[mode]
+
+	child = None
+	if BFS:
+		child = deque.popleft
+	else:
+		child = deque.pop
+
+	nodes_found = []	
+
 	while visit:
 		node = child(visit)
 		for offset in neighbors:
@@ -173,9 +187,11 @@ def find_similar(array, neighbors, start, similar, mode='BFS'):
 				block.add(index)
 				if is_valid(array, index):
 					value = get_item(array, index)
-					if similar(value, match):
+					if eq(value, match):
 						visit.append(index)
-		yield node
+		nodes_found += [node]
+
+	return nodes_found
 
 def print_gameboard(gameboard):
 	symbols = [' ', '$','^','@','+','=','*','V',';','&']
@@ -210,17 +226,17 @@ def is_valid(array, index):
 	row, column = index
 	return 0 <= row < len(array) and 0 <= column < len(array[row])
 
-def get_nonzero(array, neighbors, similar):
+def get_nonzero(array, neighbors):
 	nonzero = []
 	for x in range(len(array)):
 		for y in range(len(array[0])):
 			start = x, y
-			node_length = len(list(find_similar(array, neighbors, start, similar, 'BFS')))
+			node_length = len(find_similar(array, neighbors, start, BFS=True))
 			if array[x][y]!=0 and node_length>=2:
 				nonzero.append([x,y])
 	return nonzero
 
-def get_zeroes(array, neighbors, similar):
+def get_zeroes(array, neighbors):
 	zeroes = []
 	for x in range(len(array)):
 		for y in range(len(array[0])):
@@ -228,19 +244,19 @@ def get_zeroes(array, neighbors, similar):
 				zeroes.append([x,y])
 	return zeroes
 
-def find_most_similar(array, neighbors, similar, mode):
+def find_most_similar(gameboard, neighbors, do_bfs):
 	most_similar = [0,0]
 	largest = 0
-	for x in range(len(array)):
-		for y in range(len(array[0])):
+	for x in range(len(gameboard)):
+		for y in range(len(gameboard[0])):
 			start = x, y
 
 			#exclude 0 and exclude nodes with length <2
-			node_length = len(list(find_similar(array, neighbors, start, similar , 'BFS')))
-			if array[x][y] == 0 or node_length<2:
+			node_length = len(find_similar(gameboard, neighbors, start, do_bfs))
+			if gameboard[x][y] == 0 or node_length<2:
 				continue
 			
-			number_similar = len(list(find_similar(array, neighbors, start, similar, 'BFS')))
+			number_similar = len(find_similar(gameboard, neighbors, start, do_bfs))
 			if number_similar>largest:
 				largest = number_similar
 				most_similar = [x,y]
@@ -248,28 +264,28 @@ def find_most_similar(array, neighbors, similar, mode):
 	return most_similar, largest
 
 
-def calculate_state_score(gameboard, neighbors, similar):
+def calculate_state_score(gameboard, neighbors):
 	totalscore=0
 	for i in range(9):
 		for j in range(9):
 			if(gameboard[i][j]!=0):
-				totalscore+=len(list(find_similar(gameboard, neighbors, (i,j), similar)))
+				totalscore+=len(find_similar(gameboard, neighbors, (i,j)))
 	return totalscore
 
 
-def random_search(gameboard, neighbors, similar, method="default"):
+def random_search(gameboard, neighbors, method="default"):
 	coordinates_used = []
 	#testing_gameboard = copy.deepcopy(gameboard)
-	info = find_most_similar(gameboard, neighbors, similar, 'BFS')
+	info = find_most_similar(gameboard, neighbors, do_bfs=True)
 	
 	while (info[1]>1):
-		possible_choices = get_nonzero(gameboard, neighbors, similar)
+		possible_choices = get_nonzero(gameboard, neighbors)
 		if(len(possible_choices)>0):
 			random_choice = random.randint(0, len(possible_choices)-1)
 
 			start = possible_choices[random_choice][0], possible_choices[random_choice][1]
 
-			modify_coords = list(find_similar(gameboard, neighbors, start, similar, 'BFS'))
+			modify_coords = find_similar(gameboard, neighbors, start, BFS=True)
 
 			gameboard = modify_gameboard(gameboard, modify_coords)
 			
@@ -281,7 +297,7 @@ def random_search(gameboard, neighbors, similar, method="default"):
 
 		else:
 			break
-	zero_count = len(get_zeroes(gameboard, neighbors, similar))
+	zero_count = len(get_zeroes(gameboard, neighbors))
 	#print("Finishing sequence with", 81-zero_count, " blocks remaining.\n")
 	#print("End State: \n")
 	#for element in gameboard:
