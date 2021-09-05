@@ -1,12 +1,13 @@
 #! /usr/bin/env python3
 from collections import deque
 from operator import eq
-import random, copy, time, inspect, image_grid
+from datetime import datetime
+import random, copy, time, image_grid, threading
 
 
 #Note: Solution (x,y) starts at top left corner, which is (0,0) and x corresponds to vertical direction, y corresponds to horizontal. 
 
-dead_end_counter_limit = 500
+dead_end_counter_limit = 250
 def main():
 	"""Show how to search for similar neighbors in a 2D array structure."""
 	gameboard = image_grid.main_process()
@@ -16,7 +17,7 @@ def main():
 	print_gameboard(gameboard)
 	#to_modify = find_similar(some_array, neighbors, start, BFS=True)
 	#gameboard = modify_gameboard(some_array, to_modify)
-	enable_manual = "Y" #input("Enable manual mode? (Y / N) ")
+	enable_manual = "N" #input("Enable manual mode? (Y / N) ")
 
 	if enable_manual == "N" or enable_manual == "No":
 		automatic_search(gameboard, neighbour_offsets)
@@ -33,7 +34,6 @@ def automatic_search(gameboard, neighbour_offsets):
 	best_so_far = 0
 	dead_end_counter = 0
 
-	average = 40
 	gameboard = copy.deepcopy(gameboard_original)
 	coordinates_used = []
 	while(gameboard[8][0] != 0):
@@ -41,23 +41,26 @@ def automatic_search(gameboard, neighbour_offsets):
 		#print("Before mod:", coordinates_used)
 		#for element in gameboard:
 			#print(element)
-		final_info = random_search(gameboard, neighbour_offsets, "random")	
+		final_info = random_search(gameboard, neighbour_offsets, "random")
+		#final_info = directed_search(gameboard, neighbour_offsets)	
+		
 		#print(final_info)
 
 		for element in final_info[0]:
 			coordinates_used.append(element)
 		
-		#print("coord used + final info", coordinates_used
+		#print("coord used + final info", coordinates_used, " ", 81-final_info[1], "\n")
 
 		best_so_far = final_info[1]
 		if 81-best_so_far != 0:
 			if (81-best_so_far)< best_result:
 				best_result = 81-best_so_far
 				dead_end_counter=0
-				state_score = calculate_state_score(gameboard, neighbour_offsets)
+				#state_score = calculate_state_score(gameboard, neighbour_offsets)
 				#print_gameboard(gameboard)
 
-				print("Best: ", best_result,"\n", "Coordinates: ",coordinates_used,"\n", "State score: ", state_score)
+				print("Best: ", best_result,"\n", "Coordinates: ",coordinates_used,"\n")
+
 			dead_end_counter +=1
 				
 
@@ -67,10 +70,8 @@ def automatic_search(gameboard, neighbour_offsets):
 
 		if gameboard[8][0] != 0 and dead_end_counter<=dead_end_counter_limit:
 
-			if len(coordinates_used)<20:
-				go_back_by = len(coordinates_used) - min(random.randint(7,15), len(coordinates_used))
-			else:
-				go_back_by = len(coordinates_used) - min(random.randint(2,5), len(coordinates_used))
+			generator  = [1]*10 + [2]*10+ [3] * 35 + [5] * 115 + [7] * 35 +[11]*25 + [15]*10
+			go_back_by = len(coordinates_used) - min(random.choice(generator), len(coordinates_used))
 			coordinates_used = coordinates_used[:go_back_by]
 			#print("After mod: ",coordinates_used)
 			gameboard = copy.deepcopy(gameboard_original)
@@ -84,6 +85,10 @@ def automatic_search(gameboard, neighbour_offsets):
 			dead_end_counter = 0
 			best_result = 82
 			coordinates_used = []
+			
+			now = datetime.now()
+			current_time = now.strftime("%H:%M:%S")
+			print("Current Time:", current_time, "\n")
 		
 	print(coordinates_used, len(coordinates_used))
 	print("Searched: ", counter, "possibilities.")
@@ -94,9 +99,26 @@ def manual_search(gameboard, neighbour_offsets):
 		testing_gameboard = copy.deepcopy(gameboard)
 		info, largest = find_most_similar(testing_gameboard, neighbour_offsets, do_bfs=True)
 
-			info = find_most_similar(testing_gameboard, neighbors, similar, 'BFS')
-		print ("Suggested: ", info[0], " with ", info[1], " nodes.")
+		info = find_most_similar(testing_gameboard, neighbour_offsets, True)
+		#print ("Suggested: ", info[0], " with ", info[1], " nodes.")
 		
+		score_matrix = give_priority(get_score_matrix(gameboard, neighbour_offsets))
+		print_array_of_arrays(score_matrix)
+
+		max_x = 0
+		max_y =0
+		max_value = -9999
+		for i in range(len(score_matrix)):
+			for j in range(len(score_matrix[0])):
+				if (max_value < score_matrix[i][j] and score_matrix[i][j]!=0):
+					max_x =i
+					max_y = j
+					max_value = score_matrix[i][j]
+
+		print ("Suggested: ", max_x, max_y)
+		x = probabilistic_choice(score_matrix)
+		print("probabilistic choice: ", x//9, " ",x%9)
+
 
 		x_coord = int(input("Enter x "))
 		y_coord = int(input("Enter y "))
@@ -105,6 +127,8 @@ def manual_search(gameboard, neighbour_offsets):
 		print(modify_coords)
 
 		gameboard = modify_gameboard(gameboard, modify_coords)
+
+
 		print("Zeroes: ", len(get_zeroes(gameboard,neighbour_offsets)))
 		print_gameboard(gameboard)
 
@@ -206,7 +230,11 @@ def print_gameboard(gameboard):
 		print()
 	print('  --------------------')
 	print('    0 1 2 3 4 5 6 7 8 ')
-	
+
+def print_array_of_arrays(input):
+	for element in input:
+		print(element)
+	print("\n")
 
 def get_item(array, index):
 	"""Access the data structure based on the given position information."""
@@ -263,6 +291,13 @@ def find_most_similar(gameboard, neighbors, do_bfs):
 	
 	return most_similar, largest
 
+def get_isolated_islands(array, neighbors):
+	isolated_islands=[]
+	for x in range(len(array)):
+		for y in range(len(array[0])):
+			if len(find_similar(array, neighbors,(x,y)))==1:
+				isolated_islands.append([x,y])
+	return isolated_islands
 
 def calculate_state_score(gameboard, neighbors):
 	totalscore=0
@@ -271,6 +306,51 @@ def calculate_state_score(gameboard, neighbors):
 			if(gameboard[i][j]!=0):
 				totalscore+=len(find_similar(gameboard, neighbors, (i,j)))
 	return totalscore
+
+def get_score_matrix(gameboard, neighbors):
+	gameboard_original = copy.deepcopy(gameboard)
+	gameboard = copy.deepcopy(gameboard_original)
+	score_matrix = [[0 for i in range(9)] for j in range(9)]
+	for i in range(9):
+		for j in range(9):
+			if(gameboard[i][j]!=0 and len(find_similar(gameboard, neighbors, (i,j)))>1):
+				modify_coords = find_similar(gameboard, neighbors, (i,j), BFS=True)
+				gameboard = modify_gameboard(gameboard, modify_coords)
+				#print(len(get_isolated_islands(gameboard, neighbors)))
+				score_matrix[i][j] = 4*calculate_state_score(gameboard, neighbors)-6*len(get_isolated_islands(gameboard, neighbors))+2*len(get_zeroes(gameboard,neighbors))
+			gameboard = copy.deepcopy(gameboard_original)
+
+	return score_matrix
+
+def give_priority(score_matrix):
+	highest_scores=[]
+	for i in range(len(score_matrix)):
+		for j in range(len(score_matrix[0])):
+			highest_scores.append(score_matrix[i][j])
+
+
+	highest_scores = sorted(list(set(highest_scores)))
+	#print(highest_scores)
+
+	for i in range(len(score_matrix)):
+		for j in range(len(score_matrix[0])):
+			position = highest_scores.index(score_matrix[i][j])
+			score_matrix[i][j]*= position
+			score_matrix[i][j]= score_matrix[i][j]//3
+	
+	return score_matrix
+	
+
+def probabilistic_choice(score_matrix):
+	generator = [0]*0
+	for i in range(len(score_matrix)):
+		for j in range(len(score_matrix[0])):
+			generator += [i*9+j]*score_matrix[i][j]
+
+	if generator == [0]*0:
+		return -1
+	choice = random.choice(generator)
+	return choice
 
 
 def random_search(gameboard, neighbors, method="default"):
@@ -306,8 +386,42 @@ def random_search(gameboard, neighbors, method="default"):
 	'''print(coordinates_used)'''
 	return coordinates_used, zero_count
 
+def directed_search(gameboard, neighbors):
+	coordinates_used = []
+	#testing_gameboard = copy.deepcopy(gameboard)
+	info = find_most_similar(gameboard, neighbors, do_bfs=True)
+	
+	while (info[1]>1):
+		possible_choices = get_nonzero(gameboard, neighbors)
+		if(len(possible_choices)>0):
+			score_matrix = give_priority(get_score_matrix(gameboard, neighbors))
+			directed_choice = probabilistic_choice(score_matrix)
+
+			start = directed_choice//9, directed_choice%9
+
+			modify_coords = find_similar(gameboard, neighbors, start, BFS=True)
+
+			gameboard = modify_gameboard(gameboard, modify_coords)
+			
+			'''for element in gameboard:
+				print(element)'''
+			
+			coordinates_used.append(start)
+			#print("\n")
+
+		else:
+			break
+	zero_count = len(get_zeroes(gameboard, neighbors))
+	#print("Finishing sequence with", 81-zero_count, " blocks remaining.\n")
+	#print("End State: \n")
+	#for element in gameboard:
+		#print(element)
+	
+	'''print(coordinates_used)'''
+	return coordinates_used, zero_count
 
 if __name__ == '__main__':
 	start_time = time.time()
 	main()
 	print("Execution time --- %s seconds ---" % (time.time() - start_time))
+
