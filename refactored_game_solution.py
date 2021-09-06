@@ -172,7 +172,7 @@ def modify_gameboard(gameboard, nodes_to_remove):
 	return gameboard
 
 
-def print_gameboard(gameboard):
+def print_gameboard(gameboard, highlight_pieces = []):
 	symbols = [' ', '$', '^', '@', '+', '=', '*', 'V', ';', '&']
 
 	# gameboard assumed to be 9x9
@@ -180,10 +180,16 @@ def print_gameboard(gameboard):
 		print(row, end='')
 		print(' | ', end='')
 
-		for num in gameboard[row]:
-			print(symbols[num] + ' ', end='')
+		for col, num in enumerate(gameboard[row]):
+			charStr = str(symbols[num])
+			if (row, col) in highlight_pieces:
+				# surround the charStr in characters to make it highlight
+				charStr = '\033[2;31;43m' + charStr + '\033[0;0m'
+
+			print(charStr + ' ', end='')
+
 		print()
-	print('  --------------------')
+	print('   --------------------')
 	print(' 0 1 2 3 4 5 6 7 8 ')
 
 
