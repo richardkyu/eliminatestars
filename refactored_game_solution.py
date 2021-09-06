@@ -312,6 +312,69 @@ def follow_random_path(gameboard):
 	return coordinates_used, gameboard
 
 
+total_configurations = 0
+total_non_winning = 0
+total_non_winning_roots = 0
+total_non_winning_roots_by_depth = [0, 0, 0, 0, 0, 0, 0]
+
+def exhaustive_search(gameboard, depth, prev_moves, stop_at_win=True):
+	'''
+	Recursively searches through all possible moves.
+
+	If stop_at_win is true, this will stop once the board is empty
+	'''
+	global total_configurations, total_non_winning, total_non_winning_roots
+	possible_moves = get_all_nodegroups(gameboard)
+
+	if len(possible_moves) == 0:
+		total_configurations += 1
+		num_zeroes = len(get_zeroes(gameboard))
+
+		if num_zeroes < 81:
+			total_non_winning += 1
+
+		return num_zeroes
+
+	best_numzeroes = -1
+
+	below_nonwinning = 0
+
+	for move in possible_moves:
+		dummy_gameboard = copy.deepcopy(gameboard)
+		dummy_gameboard = modify_gameboard(dummy_gameboard, move)
+
+		if depth == 0:
+			print("=======")
+			print("Making move : " + str(move[0]))
+			print("=======")
+
+		new_prev_move = prev_moves.copy()
+		new_prev_move += [move[0]]
+
+		numzeroes = exhaustive_search(dummy_gameboard, depth + 1, new_prev_move, stop_at_win)
+		if numzeroes < 81:
+			below_nonwinning += 1
+		if numzeroes > best_numzeroes:
+			best_numzeroes = numzeroes
+		if stop_at_win and numzeroes == 81:
+			return 81
+
+	if best_numzeroes == 81:
+		total_non_winning_roots += below_nonwinning
+
+		if depth < 6:
+			total_non_winning_roots_by_depth[depth] += below_nonwinning
+	elif depth <= 3:
+		print("[[unsolvable]]")
+		print("Depth | " + str(depth))
+		print("Moves | " + str(prev_moves))
+		print_gameboard(gameboard)
+
+	return best_numzeroes
+
+
+
+
 #
 # Manual Search
 
