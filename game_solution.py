@@ -6,7 +6,7 @@ import random, copy, time, inspect, image_grid
 
 #Note: Solution (x,y) starts at top left corner, which is (0,0) and x corresponds to vertical direction, y corresponds to horizontal. 
 
-dead_end_counter_limit = 500
+dead_end_counter_limit = 150
 def main():
 	"""Show how to search for similar neighbors in a 2D array structure."""
 	gameboard = image_grid.main_process()
@@ -16,7 +16,7 @@ def main():
 	print_gameboard(gameboard)
 	#to_modify = find_similar(some_array, neighbors, start, BFS=True)
 	#gameboard = modify_gameboard(some_array, to_modify)
-	enable_manual = "Y" #input("Enable manual mode? (Y / N) ")
+	enable_manual = "N" #input("Enable manual mode? (Y / N) ")
 
 	if enable_manual == "N" or enable_manual == "No":
 		automatic_search(gameboard, neighbour_offsets)
@@ -94,7 +94,7 @@ def manual_search(gameboard, neighbour_offsets):
 		testing_gameboard = copy.deepcopy(gameboard)
 		info, largest = find_most_similar(testing_gameboard, neighbour_offsets, do_bfs=True)
 
-			info = find_most_similar(testing_gameboard, neighbors, similar, 'BFS')
+		info = find_most_similar(testing_gameboard, neighbour_offsets, 'BFS')
 		print ("Suggested: ", info[0], " with ", info[1], " nodes.")
 		
 
