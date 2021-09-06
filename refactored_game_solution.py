@@ -4,7 +4,6 @@ from operator import eq
 import random
 import copy
 import time
-import inspect
 import image_grid
 
 
@@ -237,14 +236,12 @@ def random_search(gameboard):
 
 		if num_zeroes > best_num_zeroes:
 			best_num_zeroes = num_zeroes
-			state_score = calculate_state_score(gameboard)
 			dead_ends_to_get_here = dead_end_counter
 			dead_end_counter = 0
 			print()
 			print("Best: ", best_num_zeroes, "\n", 
 				# "Coordinates: ", cords_used, "\n", 
 				"Num moves: ", len(cords_used), "\n",
-				"State score: ", state_score, "\n",
 				"Dead Ends: ", dead_ends_to_get_here)
 		
 		if dead_end_counter > dead_end_counter_limit:
@@ -256,13 +253,8 @@ def random_search(gameboard):
 			continue
 		
 		# go backwards some # steps
-		if len(cords_used) < 20:
-			go_back_by = len(cords_used) - \
-				min(random.randint(7, 15), len(cords_used))
-		else:
-			go_back_by = len(cords_used) - \
-				min(random.randint(2, 5), len(cords_used))
-		
+		generator  = [1]*10 + [2]*10+ [3] * 55 + [5] * 80 + [7] * 35 +[11]*25 + [15]*10
+		go_back_by = len(cords_used) - min(random.choice(generator), len(cords_used))
 		cords_used = cords_used[:go_back_by]
 		gameboard = copy.deepcopy(gameboard_original)
 		for move in cords_used:
@@ -417,7 +409,7 @@ def manual_search(gameboard):
 
 # Note: Solution (x,y) starts at top left corner, which is (0,0) and x corresponds to vertical direction, y corresponds to horizontal.
 
-dead_end_counter_limit = 500
+dead_end_counter_limit = 750
 
 def main():
 	"""Show how to search for similar neighbors in a 2D array structure."""
