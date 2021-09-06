@@ -122,62 +122,54 @@ def get_largest_nodegroup(gameboard, valid_moves_only=True):
 	return largest_group
 
 
-def modify_gameboard(gameboard, to_modify):
-	if len(to_modify) < 2:
-		'''print("invalid")
-		curframe = inspect.currentframe()
-		calframe = inspect.getouterframes(curframe, 2)
-		print('caller name:', calframe[1][3])'''
+def modify_gameboard(gameboard, nodes_to_remove):
+	'''
+	Simulates a move in the game. It expects nodes_to_remove to
+	be a list of positions to be removed, and then this function
+	handles the shifting around.
+
+	gameboard IS modified. If you need a copy, do copy.deepcopy()
+	before passing it as an argument.
+	'''
+	if len(nodes_to_remove) < 2:
 		return gameboard
-	updated_array = gameboard.copy()
 
-	# Change all elements in connected nodes to 0.
-	for element in to_modify:
-		updated_array[element[0]][element[1]] = 0
+	# Remove nodes
+	for node in nodes_to_remove:
+		x, y = node
+		gameboard[x][y] = 0
 
-	# Before all shifts
-	'''for element in updated_array:
-		print(element)
-	print("\n")'''
+	# Next, collapse each column down
+	# so that all the 0s are on top
+	for col in range(9):
+		blank_square_row = 8
 
-	# move coordinates down if there is a zero.
-	for x in range(1, len(updated_array)):
-		for y in range(len(updated_array[0])):
-			if updated_array[x][y] == 0 and updated_array[x-1][y] != 0:
-				for check in range(x, 0, -1):
-					updated_array[check][y], updated_array[check -
-														   1][y] = updated_array[check-1][y], updated_array[check][y]
+		for row in range(8, -1, -1):
+			if gameboard[row][col] == 0:
+				continue
+			piece_value = gameboard[row][col]
+			gameboard[row][col] = 0
+			gameboard[blank_square_row][col] = piece_value
 
-	# detect when there are holes at the bottom
-	empty_bottom = []
-	for y in range(len(updated_array[0])):
-		if updated_array[len(updated_array)-1][y] == 0:
-			empty_bottom.append(y)
+			blank_square_row -= 1
 
-	# print(empty_bottom)
-	# Iterate through grid again and collect coordinates to be shifted.
-	shifted_coordinates = []
-	for x in range(len(updated_array)):
-		for y in range(len(updated_array[0])):
-			for element in empty_bottom:
-				if y > element and updated_array[x][y] != 0:
-					shifted_coordinates.append([x, y])
+	# Then shift any empty columns to the left
+	leftmost_col = 0
 
-	# print(shifted_coordinates)
+	for col in range(9):
+		# don't shift empty columns
+		if gameboard[8][col] == 0:
+			continue
 
-	for element in shifted_coordinates:
-		shift_by = shifted_coordinates.count([element[0], element[1]])
-		# print(shift_by)
-		updated_array[element[0]][element[1]], updated_array[element[0]][element[1] -
-																		 shift_by] = updated_array[element[0]][element[1]-shift_by], updated_array[element[0]][element[1]]
-		shifted_coordinates = [
-			value for value in shifted_coordinates if value != element]
+		# shift this column if columns to the left have been shifted
+		if col != leftmost_col:
+			for row in range(9):
+				gameboard[row][leftmost_col] = gameboard[row][col]
+				gameboard[row][col] = 0
 
-	# After all shifts
-	# for element in updated_array:
-		# print(element)
+		leftmost_col += 1
 
-	return updated_array
+	return gameboard
 
 
 def print_gameboard(gameboard):
