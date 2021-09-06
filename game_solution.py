@@ -16,7 +16,7 @@ def main():
 	print_gameboard(gameboard)
 	#to_modify = find_similar(some_array, neighbors, start, BFS=True)
 	#gameboard = modify_gameboard(some_array, to_modify)
-	enable_manual = "Y" #input("Enable manual mode? (Y / N) ")
+	enable_manual = "N" #input("Enable manual mode? (Y / N) ")
 
 	if enable_manual == "N" or enable_manual == "No":
 		automatic_search(gameboard, neighbour_offsets)
@@ -54,10 +54,9 @@ def automatic_search(gameboard, neighbour_offsets):
 			if (81-best_so_far)< best_result:
 				best_result = 81-best_so_far
 				dead_end_counter=0
-				state_score = calculate_state_score(gameboard, neighbour_offsets)
 				#print_gameboard(gameboard)
 
-				print("Best: ", best_result,"\n", "Coordinates: ",coordinates_used,"\n", "State score: ", state_score)
+				print("Best: ", best_result,"\n", "Coordinates: ",coordinates_used,"\n")
 			dead_end_counter +=1
 				
 
@@ -94,7 +93,7 @@ def manual_search(gameboard, neighbour_offsets):
 		testing_gameboard = copy.deepcopy(gameboard)
 		info, largest = find_most_similar(testing_gameboard, neighbour_offsets, do_bfs=True)
 
-			info = find_most_similar(testing_gameboard, neighbors, similar, 'BFS')
+		info = find_most_similar(testing_gameboard, neighbour_offsets, 'BFS')
 		print ("Suggested: ", info[0], " with ", info[1], " nodes.")
 		
 
