@@ -381,11 +381,12 @@ def exhaustive_search(gameboard, depth, prev_moves, stop_at_win=True):
 def manual_search(gameboard):
 	while(True):
 		testing_gameboard = copy.deepcopy(gameboard)
+		possible_moves = get_all_nodegroups(testing_gameboard)
 
 		print()
 		print()
 		print()
-		print_gameboard(testing_gameboard)
+		print_gameboard(testing_gameboard, [x[0] for x in possible_moves])
 		print()
 
 		largest_group = get_largest_nodegroup(testing_gameboard)
@@ -422,12 +423,13 @@ def main():
 	"""Show how to search for similar neighbors in a 2D array structure."""
 	gameboard = image_grid.main_process()
 
-	enable_manual = False
-
-	if enable_manual:
-		manual_search(gameboard)
-	else:
-		random_search(gameboard)
+	# random_search(gameboard)
+	best_score = exhaustive_search(gameboard, 0, [], False)
+	print("best score | " + str(best_score))
+	print("total non-winning | " + str(total_non_winning))
+	print("total end-states  | " + str(total_configurations))
+	print("total non-winning-roots | " + str(total_non_winning_roots))
+	print("total non-winning-roots-by-depth | " + str(total_non_winning_roots_by_depth))
 
 
 
