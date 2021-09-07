@@ -192,16 +192,6 @@ def print_gameboard(gameboard, highlight_pieces = []):
 	print(' 0 1 2 3 4 5 6 7 8 ')
 
 
-def calculate_state_score(gameboard):
-	totalscore = 0
-	for i in range(9):
-		for j in range(9):
-			if(gameboard[i][j] != 0):
-				totalscore += len(get_connected_nodes(gameboard, (i, j)))
-	return totalscore
-
-
-
 
 #
 # Searches
@@ -234,6 +224,7 @@ def random_search(gameboard):
 		else:
 			dead_end_counter += 1
 
+		
 		if num_zeroes > best_num_zeroes:
 			best_num_zeroes = num_zeroes
 			dead_ends_to_get_here = dead_end_counter
@@ -253,13 +244,22 @@ def random_search(gameboard):
 			continue
 		
 		# go backwards some # steps
-		generator  = [1]*10 + [2]*10+ [3] * 55 + [5] * 80 + [7] * 35 +[11]*25 + [15]*10
-		go_back_by = len(cords_used) - min(random.choice(generator), len(cords_used))
+		if num_zeroes >76:
+			generator  = [1]*225 + [2]*250+ [3] * 25
+		else:
+			generator  = [1]*10 + [2]*10+ [3] * 10 + [4]*10 + [5] * 10\
+				+ [6]*10 + [7] * 10  +[8] * 10 + [9] *10 + [10] *10 + [11]*10 \
+				+ [12]*10+ [13]*10 + [14] *10 + [15]*10+ [16]*10+ [17] *10 \
+				+ [18]*10 + [19] *10 +[20] *10 +[21] *10 + [22]*10+ [23] *10\
+				+[24]*10 + [25]*5 + [26]*5 + [27]*5+ [28]*5
+
+		go_back_by = len(cords_used) - min(random.choice(generator), len(cords_used)-1)
 		cords_used = cords_used[:go_back_by]
 		gameboard = copy.deepcopy(gameboard_original)
 		for move in cords_used:
 			modify_coords = get_connected_nodes(gameboard, move)
 			gameboard = modify_gameboard(gameboard, modify_coords)
+		#print(cords_used)
 	
 	print()
 	print()
@@ -409,19 +409,19 @@ def manual_search(gameboard):
 
 # Note: Solution (x,y) starts at top left corner, which is (0,0) and x corresponds to vertical direction, y corresponds to horizontal.
 
-dead_end_counter_limit = 750
+dead_end_counter_limit = 3500
 
 def main():
 	"""Show how to search for similar neighbors in a 2D array structure."""
 	gameboard = image_grid.main_process()
 
-	# random_search(gameboard)
-	best_score = exhaustive_search(gameboard, 0, [], False)
+	random_search(gameboard)
+	'''best_score = exhaustive_search(gameboard, 0, [], False)
 	print("best score | " + str(best_score))
 	print("total non-winning | " + str(total_non_winning))
 	print("total end-states  | " + str(total_configurations))
 	print("total non-winning-roots | " + str(total_non_winning_roots))
-	print("total non-winning-roots-by-depth | " + str(total_non_winning_roots_by_depth))
+	print("total non-winning-roots-by-depth | " + str(total_non_winning_roots_by_depth))'''
 
 
 
