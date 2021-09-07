@@ -209,6 +209,7 @@ def random_search(gameboard):
 	possibilities_counter = 0
 
 	best_num_zeroes = -1
+	reset_condition = 0
 	
 	while (gameboard[8][0] != 0): # gameboard[8][0] == 0   <=>  gameboard is solved
 		possibilities_counter += 1
@@ -224,6 +225,16 @@ def random_search(gameboard):
 		else:
 			dead_end_counter += 1
 
+		if num_zeroes >70:
+			#print(num_zeroes)
+			reset_condition += 1
+		else:
+			reset_condition =0
+		
+		if reset_condition > 50:
+			dead_end_counter = dead_end_counter_limit
+			reset_condition =0
+			print("resetting.")
 		
 		if num_zeroes > best_num_zeroes:
 			best_num_zeroes = num_zeroes
@@ -244,8 +255,11 @@ def random_search(gameboard):
 			continue
 		
 		# go backwards some # steps
-		if num_zeroes >76:
-			generator  = [1]*225 + [2]*250+ [3] * 25
+		if num_zeroes >65:
+			generator  = [1]*10 + [2]*10+ [3] * 10 + [4]*10 + [5] * 10\
+				+ [6]*10 + [7] * 10  +[8] * 10 + [9] *10 + [10] *10
+		elif num_zeroes >70:
+			generator  = [1]*225 + [2]*250+ [3] * 200 + [4]*175 + [5] * 150
 		else:
 			generator  = [1]*10 + [2]*10+ [3] * 10 + [4]*10 + [5] * 10\
 				+ [6]*10 + [7] * 10  +[8] * 10 + [9] *10 + [10] *10 + [11]*10 \
@@ -409,7 +423,7 @@ def manual_search(gameboard):
 
 # Note: Solution (x,y) starts at top left corner, which is (0,0) and x corresponds to vertical direction, y corresponds to horizontal.
 
-dead_end_counter_limit = 3500
+dead_end_counter_limit = 15000
 
 def main():
 	"""Show how to search for similar neighbors in a 2D array structure."""
