@@ -209,7 +209,6 @@ def random_search(gameboard):
 	possibilities_counter = 0
 
 	best_num_zeroes = -1
-	reset_condition = 0
 	
 	while (gameboard[8][0] != 0): # gameboard[8][0] == 0   <=>  gameboard is solved
 		possibilities_counter += 1
@@ -224,17 +223,6 @@ def random_search(gameboard):
 			break
 		else:
 			dead_end_counter += 1
-
-		if num_zeroes >70:
-			#print(num_zeroes)
-			reset_condition += 1
-		else:
-			reset_condition =0
-		
-		if reset_condition > 50:
-			dead_end_counter = dead_end_counter_limit
-			reset_condition =0
-			print("resetting.")
 		
 		if num_zeroes > best_num_zeroes:
 			best_num_zeroes = num_zeroes
@@ -255,13 +243,7 @@ def random_search(gameboard):
 			continue
 		
 		# go backwards some # steps
-		if num_zeroes >65:
-			generator  = [1]*10 + [2]*10+ [3] * 10 + [4]*10 + [5] * 10\
-				+ [6]*10 + [7] * 10  +[8] * 10 + [9] *10 + [10] *10
-		elif num_zeroes >70:
-			generator  = [1]*225 + [2]*250+ [3] * 200 + [4]*175 + [5] * 150
-		else:
-			generator  = [1]*10 + [2]*10+ [3] * 10 + [4]*10 + [5] * 10\
+		generator  = [1]*10 + [2]*10+ [3] * 10 + [4]*10 + [5] * 10\
 				+ [6]*10 + [7] * 10  +[8] * 10 + [9] *10 + [10] *10 + [11]*10 \
 				+ [12]*10+ [13]*10 + [14] *10 + [15]*10+ [16]*10+ [17] *10 \
 				+ [18]*10 + [19] *10 +[20] *10 +[21] *10 + [22]*10+ [23] *10\
