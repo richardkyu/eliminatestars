@@ -429,7 +429,7 @@ def manual_search(gameboard):
 
 # Note: Solution (x,y) starts at top left corner, which is (0,0) and x corresponds to vertical direction, y corresponds to horizontal.
 
-dead_end_counter_limit = 1500
+dead_end_counter_limit = 15000
 
 def main():
 	"""Show how to search for similar neighbors in a 2D array structure."""
