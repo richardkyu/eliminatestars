@@ -5,6 +5,7 @@ import random
 import copy
 import time
 import image_grid
+import statistics
 
 
 
@@ -218,6 +219,10 @@ def random_search(gameboard):
 			cords_used.append(move)
 		num_zeroes = len(get_zeroes(modified_gameboard))
 
+		#Keep track of execution
+		if dead_end_counter%10000 == 0:
+			print(dead_end_counter)
+
 		# 81 zeroes = game is won
 		if num_zeroes == 81:
 			break
@@ -233,6 +238,7 @@ def random_search(gameboard):
 				# "Coordinates: ", cords_used, "\n", 
 				"Num moves: ", len(cords_used), "\n",
 				"Dead Ends: ", dead_ends_to_get_here)
+			print("Coordinates: ", cords_used)
 		
 		if dead_end_counter > dead_end_counter_limit:
 			print(" > dead_end_counter_limit exceeded, starting new path")
@@ -242,12 +248,15 @@ def random_search(gameboard):
 			gameboard = copy.deepcopy(gameboard_original)
 			continue
 		
-		# go backwards some # steps
-		generator  = [1]*10 + [2]*10+ [3] * 10 + [4]*10 + [5] * 10\
-				+ [6]*10 + [7] * 10  +[8] * 10 + [9] *10 + [10] *10 + [11]*10 \
-				+ [12]*10+ [13]*10 + [14] *10 + [15]*10+ [16]*10+ [17] *10 \
-				+ [18]*10 + [19] *10 +[20] *10 +[21] *10 + [22]*10+ [23] *10\
-				+[24]*10 + [25]*5 + [26]*5 + [27]*5+ [28]*5
+		# go backwards some # steps from already generated dead-end sequence.
+		generator = []
+		for i in range(len(cords_used)):
+			generator += [i]*(100-(2*i))
+		'''generator  = [1]*5 + [2]*15+ [3] * 15 + [4]*15 + [5] * 15\
+				+ [6]*15 + [7] * 5  +[8] * 5 + [9] *5 + [10] *5 + [11]*5 \
+				+ [12]*5+ [13]*5 + [14] *5 + [15]*5+ [16]*5+ [17] *5 \
+				+ [18]*5 + [19] *5 +[20] *5 +[21] *5 + [22]*5+ [23] *5\
+				+[24]*5 + [25]*5 + [26]*5 + [27]*5+ [28]*5+[29]*5+[30]*5 +[31]*5 +[32]*5'''
 
 		go_back_by = len(cords_used) - min(random.choice(generator), len(cords_used)-1)
 		cords_used = cords_used[:go_back_by]
@@ -283,9 +292,24 @@ def follow_random_path(gameboard):
 		while True:
 			all_possible_moves = get_all_nodegroups(gameboard)
 			possible_choices = [group[0] for group in all_possible_moves]
+			weights = [len(group) for group in all_possible_moves]
 
 			if(len(possible_choices) > 0):
-				random_choice = random.randint(0, len(possible_choices)-1)
+				#choose randomly with weight on size of group.
+				generator = []
+				for i in range(len(possible_choices)):
+					strategy = random.randint(0,3)
+					if(strategy<3):
+						generator += [i]*25*(max(weights)-weights[i]+1)
+					elif(strategy ==3):
+						generator += [i] * weights[i]
+					#generator += [i] * 10*(abs(int(statistics.median(weights))-weights[i])+1)
+					#print(generator)
+
+				if(generator):
+					random_choice = random.choice(generator)
+				else:
+					random_choice = random.randint(0, len(possible_choices)-1)
 
 				x, y = possible_choices[random_choice]
 				start = (x, y)
@@ -405,7 +429,7 @@ def manual_search(gameboard):
 
 # Note: Solution (x,y) starts at top left corner, which is (0,0) and x corresponds to vertical direction, y corresponds to horizontal.
 
-dead_end_counter_limit = 15000
+dead_end_counter_limit = 1500
 
 def main():
 	"""Show how to search for similar neighbors in a 2D array structure."""
